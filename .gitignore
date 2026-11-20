@@ -1,3 +1,6 @@
 /vendor/
 /.env
 *.log
+/uploads/events/*
+!/uploads/events/.htaccess
+!/uploads/events/.gitkeep

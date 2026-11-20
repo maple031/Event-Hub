@@ -1,38 +1,61 @@
-# Campus EventHub — College Event Management System
+# College Event Hub
 
-A responsive college event management web app built with HTML, CSS, PHP, XML and MongoDB Atlas.
+A responsive college event portal built with PHP, MongoDB Atlas, HTML, CSS, and JavaScript.
 
 ## Features
-- Dashboard with student, event and registration totals
-- Add and list students
-- Create and list campus events
-- Register a student for an event
-- Prevent duplicate student/event registrations
-- Registration report
-- Responsive layout for desktop and mobile
 
-## Requirements
-- PHP 8.1+
-- Composer
-- PHP MongoDB extension (`ext-mongodb`)
-- MongoDB Atlas cluster (or MongoDB server)
+- Separate student registration/login and admin login portals
+- Student profiles with unique roll number, branch, section, and phone
+- Student dashboard with upcoming events and registration history
+- Admin dashboard with student/event/registration totals and recent activity
+- Admin event create, edit, delete, poster upload, deadline, and participant limit
+- Student registration requests with pending/confirmed/rejected statuses
+- Admin participant search, branch/section filters, and CSV export
+- Password hashing, CSRF protection, session rotation, and role checks
 
-## Setup
-1. Extract this project folder.
-2. Install/enable the PHP MongoDB extension. Check with `php -m` and confirm `mongodb` appears.
-3. In this folder, install the PHP dependencies: `php composer.phar install` (or `composer install` if Composer is installed globally).
-4. In PowerShell, set your MongoDB Atlas connection string for this terminal session. Keep it private; do not commit it or share screenshots containing it:
-   ```powershell
-   $env:MONGODB_URI = 'mongodb+srv://<username>:<password>@<cluster-host>/?retryWrites=true&w=majority'
-   ```
-   Replace the placeholders with your Atlas database user's details. URL-encode special characters in the password.
-5. In MongoDB Atlas, ensure the database user exists and your current IP is allowed under Network Access.
-6. Start the app from the project folder: `php -S 127.0.0.1:8000`
-7. Open `http://127.0.0.1:8000`. The header should say **MongoDB connected**. If it says **not configured**, check that `MONGODB_URI` was set in the same PowerShell window that started PHP.
+## Requirements and setup
 
-The database `college_event_db` and its collections are created automatically when the first records are inserted.
+- PHP 8.1+, Composer, and the PHP MongoDB extension (`ext-mongodb`)
+- MongoDB Atlas (or another MongoDB deployment)
 
-To confirm PHP and Composer dependencies are available, run `php -m` and check for `mongodb`, then run `php composer.phar check-platform-reqs`.
+From the project folder, install dependencies if needed:
 
-## Important security note
-For a real deployment, read the URI from an environment variable rather than hard-coding it. Never commit your real connection string or database password to GitHub.
+```powershell
+php composer.phar install
+```
+
+Set the connection URI in the same PowerShell session used to run PHP. Keep it private:
+
+```powershell
+$env:MONGODB_URI = 'mongodb+srv://<username>:<password>@<cluster-host>/?retryWrites=true&w=majority'
+php -S 127.0.0.1:8000
+```
+
+Open `http://127.0.0.1:8000`. The application uses the `college_event_db` database and the `students`, `admins`, `events`, and `registrations` collections. It creates required indexes when the relevant account or registration flow is used.
+
+## Create an admin account
+
+Admin registration is not available on the public site. Before starting the web server, create admins from a PowerShell session where `MONGODB_URI` is set (or set it again in a second terminal). The password is entered securely and is not placed in the command history:
+
+```powershell
+$securePassword = Read-Host "Admin password (12–72 characters)" -AsSecureString
+$passwordPointer = [IntPtr]::Zero
+try {
+    $passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+    $env:ADMIN_INITIAL_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer)
+    php scripts/create_admin.php campusadmin "Campus Administrator"
+} finally {
+    Remove-Item Env:ADMIN_INITIAL_PASSWORD -ErrorAction SilentlyContinue
+    if ($passwordPointer -ne [IntPtr]::Zero) {
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer)
+    }
+}
+```
+
+Student accounts are created from **Student Registration** on the home page. New event registrations begin as pending and reserve a participant place until an admin confirms or rejects them.
+
+## Event posters and deployment
+
+Posters are validated JPG, PNG, or WebP images (up to 5 MB) and stored under `uploads/events/`. If PHP's upload limits are lower than 5 MB, raise `upload_max_filesize` and `post_max_size` in `php.ini`. Keep the upload directory writable and persistent in production. Use HTTPS in deployment so session cookies are secure. Never commit MongoDB credentials or uploaded private data.
+
+Run `php -m` to confirm `mongodb` is enabled and `php composer.phar check-platform-reqs` to check PHP platform requirements.
