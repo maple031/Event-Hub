@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application>
+  <name>Campus EventHub</name>
+  <tagline>Plan. Connect. Celebrate.</tagline>
+  <database>college_event_db</database>
+  <collections>
+    <collection>students</collection>
+    <collection>events</collection>
+    <collection>registrations</collection>
+  </collections>
+  <theme>
+    <primary>#6b5ce7</primary>
+    <background>#f7f7fb</background>
+  </theme>
+</application>
