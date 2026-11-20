@@ -92,12 +92,12 @@ $exportQuery = http_build_query(array_filter([
     <label>Section<select name="section"><option value="">All sections</option><?php foreach ($sections as $value): if (!is_string($value) || $value === '') continue; ?><option value="<?= h($value) ?>" <?= $section === $value ? 'selected' : '' ?>><?= h($value) ?></option><?php endforeach; ?></select></label>
     <button class="btn btn-primary" type="submit">Filter</button>
   </form>
-  <div class="table-wrap"><table><thead><tr><th>Roll number</th><th>Student</th><th>Branch / section</th><th>Phone</th><th>Event</th><th>Registered</th><th>Status</th><th>Review</th></tr></thead><tbody>
+  <div class="table-wrap"><table><thead><tr><th>Roll number</th><th>Student</th><th>Branch / year / section</th><th>Phone</th><th>Event</th><th>Registered</th><th>Status</th><th>Review</th></tr></thead><tbody>
     <?php foreach ($registrations as $registration): $status = $registration['status'] ?? 'confirmed'; ?>
       <tr>
         <td><strong><?= h($registration['student_roll_number'] ?? '—') ?></strong></td>
         <td><?= h($registration['student_name'] ?? '') ?></td>
-        <td><?= h($registration['student_branch'] ?? '—') ?> / <?= h($registration['student_section'] ?? '—') ?></td>
+        <td><?= h($registration['student_branch'] ?? '—') ?> / <?= h($registration['student_year'] ?? '—') ?> / <?= h($registration['student_section'] ?? '—') ?></td>
         <td><?= h($registration['student_phone'] ?? '—') ?></td>
         <td><?= h($registration['event_name'] ?? '') ?><small><?= h(($registration['event_date'] ?? '') . ' ' . ($registration['event_time'] ?? '')) ?></small></td>
         <td><?= isset($registration['registered_at']) ? h($registration['registered_at']->toDateTime()->format('d M Y, H:i')) : '—' ?></td>

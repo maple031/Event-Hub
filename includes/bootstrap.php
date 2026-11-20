@@ -67,11 +67,11 @@ function sign_in($account, string $role): void {
         'name' => $account['name'],
     ];
     if ($role === 'student') $_SESSION['user']['roll_number'] = $account['roll_number'];
-    unset($_SESSION['csrf_token']);
+    unset($_SESSION['csrf_token'], $_SESSION['ui_effect']);
 }
 
 function sign_out(): void {
-    unset($_SESSION['user'], $_SESSION['csrf_token']);
+    unset($_SESSION['user'], $_SESSION['csrf_token'], $_SESSION['ui_effect']);
     session_regenerate_id(true);
 }
 
@@ -123,6 +123,14 @@ function ensure_admin_username_index(): void {
     static $created = false;
     if ($created) return;
     collection('admins')->createIndex(['username' => 1], ['unique' => true, 'name' => 'unique_admin_username']);
+    collection('admins')->createIndex(
+        ['public_signup_slot' => 1],
+        [
+            'unique' => true,
+            'name' => 'unique_public_admin_signup_slot',
+            'partialFilterExpression' => ['public_signup_slot' => ['$type' => 'string']],
+        ]
+    );
     $created = true;
 }
 

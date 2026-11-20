@@ -69,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post_string('action') === 'register
             'student_name' => $student['name'],
             'student_branch' => $student['branch'],
             'student_section' => $student['section'],
+            'student_year' => $student['year'] ?? '',
             'student_phone' => $student['phone'],
             'event_name' => $event['event_name'],
             'event_date' => $event['event_date'],
@@ -78,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post_string('action') === 'register
             'registered_at' => new MongoDB\BSON\UTCDateTime(),
         ]);
         $reservedSeat = false;
+        $_SESSION['ui_effect'] = 'paper-rocket';
         flash('success', 'Your registration was sent to the admin for confirmation.');
     } catch (Throwable $e) {
         if ($reservedSeat) {

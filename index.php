@@ -52,7 +52,9 @@ if ($dbReady && $page === 'registrations' && ($_GET['export'] ?? '') === 'csv') 
 
 require __DIR__ . '/includes/header.php';
 if (!$dbReady) {
-    echo '<section class="notice notice-error"><h2>MongoDB is unavailable</h2><p>Set <code>MONGODB_URI</code> in the same terminal where you start PHP. Check your Atlas credentials, Network Access rules, and the PHP MongoDB extension.</p></section>';
+    if ($page !== 'dashboard' || $user !== null) {
+        echo '<section class="notice notice-error"><h2>MongoDB is unavailable</h2><p>Set <code>MONGODB_URI</code> in the same terminal where you start PHP. Check your Atlas credentials, Network Access rules, and the PHP MongoDB extension.</p></section>';
+    }
     if (($page === 'dashboard' && $user === null) || in_array($page, ['login', 'signup', 'admin_login'], true)) {
         require __DIR__ . '/pages/' . $page . '.php';
     }

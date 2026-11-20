@@ -11,7 +11,7 @@
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <a class="brand" href="index.php"><span class="brand-mark">✦</span><span>College<span class="brand-light">Event Hub</span></span></a>
+    <a class="brand" href="index.php"><span class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 1 8.5 12 14l8-4v5h2V8.5L12 3Zm-7 9.5V17c3.5 2.5 10.5 2.5 14 0v-4.5l-7 3.5-7-3.5Z"/></svg></span><span>College<span class="brand-light">Event Hub</span></span></a>
     <div class="side-label">WORKSPACE</div>
     <nav>
       <?php if ($user && $user['role'] === 'admin'): ?>
@@ -42,5 +42,5 @@
     </div>
   </aside>
   <main class="main">
-    <header class="topbar"><div><span class="eyebrow">CAMPUS MANAGEMENT</span><h1><?= h($pageTitles[$page] ?? 'Dashboard') ?></h1></div><div class="top-actions"><span class="status-dot"></span><span>MongoDB <?= $dbReady ? 'connected' : 'not configured' ?></span></div></header>
+    <header class="topbar"><div><span class="eyebrow">CAMPUS MANAGEMENT</span><h1><?= h($pageTitles[$page] ?? 'Dashboard') ?></h1></div><?php if ($dbReady || $page !== 'dashboard' || $user !== null): ?><div class="top-actions"><span class="status-dot"></span><span>MongoDB <?= $dbReady ? 'connected' : 'not configured' ?></span></div><?php endif; ?></header>
     <?php if ($flashMessage): ?><div class="alert <?= h($flashMessage['type']) ?>"><?= h($flashMessage['message']) ?></div><?php endif; ?>

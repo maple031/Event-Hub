@@ -34,12 +34,13 @@ header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="event-registrations-' . date('Ymd-His') . '.csv"');
 header('Cache-Control: no-store');
 $output = fopen('php://output', 'wb');
-fputcsv($output, ['Roll number', 'Student name', 'Branch', 'Section', 'Phone', 'Event', 'Event date', 'Event time', 'Venue', 'Status', 'Registered at']);
+fputcsv($output, ['Roll number', 'Student name', 'Branch', 'Year', 'Section', 'Phone', 'Event', 'Event date', 'Event time', 'Venue', 'Status', 'Registered at']);
 foreach (collection('registrations')->find($query, ['sort' => ['registered_at' => -1]]) as $registration) {
     fputcsv($output, array_map($safeCsv, [
         $registration['student_roll_number'] ?? '',
         $registration['student_name'] ?? '',
         $registration['student_branch'] ?? '',
+        $registration['student_year'] ?? '',
         $registration['student_section'] ?? '',
         $registration['student_phone'] ?? '',
         $registration['event_name'] ?? '',

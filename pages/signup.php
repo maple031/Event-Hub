@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = post_string('name');
     $branch = post_string('branch');
     $section = strtoupper(post_string('section'));
+    $year = post_string('year');
     $phoneInput = post_string('phone');
     $phone = preg_replace('/[\s()-]/', '', $phoneInput);
     $password = $_POST['password'] ?? '';
@@ -20,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name === '' || strlen($name) > 100 ||
         $branch === '' || strlen($branch) > 80 ||
         !preg_match('/^[A-Z0-9-]{1,20}$/', $section) ||
+        $year === '' || strlen($year) > 30 ||
         !is_string($phone) || !preg_match('/^\+?[0-9]{7,15}$/', $phone) ||
         !is_string($password) || strlen($password) < 12 || strlen($password) > 72 ||
         !is_string($confirmPassword) || !hash_equals($password, $confirmPassword)
@@ -40,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'name' => $name,
             'branch' => $branch,
             'section' => $section,
+            'year' => $year,
             'phone' => $phone,
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
             'created_at' => new MongoDB\BSON\UTCDateTime(),
@@ -73,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label>Branch<input name="branch" maxlength="80" placeholder="e.g. Computer Science" required></label>
         <label>Section<input name="section" maxlength="20" placeholder="e.g. A" required></label>
       </div>
+      <label>Year of study<input name="year" maxlength="30" placeholder="e.g. 2nd Year" required></label>
       <label>Phone number<input type="tel" name="phone" autocomplete="tel" maxlength="24" placeholder="+91 9876543210" required></label>
       <label>Password<input type="password" name="password" autocomplete="new-password" minlength="12" maxlength="72" required><small>Use 12 to 72 characters.</small></label>
       <label>Confirm password<input type="password" name="confirm_password" autocomplete="new-password" minlength="12" maxlength="72" required></label>

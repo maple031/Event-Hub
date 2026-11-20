@@ -4,8 +4,8 @@ A responsive college event portal built with PHP, MongoDB Atlas, HTML, CSS, and 
 
 ## Features
 
-- Separate student registration/login and admin login portals
-- Student profiles with unique roll number, branch, section, and phone
+- A role-selection home page with separate student and admin portals
+- Student profiles with unique roll number, branch, section, year, and phone
 - Student dashboard with upcoming events and registration history
 - Admin dashboard with student/event/registration totals and recent activity
 - Admin event create, edit, delete, poster upload, deadline, and participant limit
@@ -33,9 +33,11 @@ php -S 127.0.0.1:8000
 
 Open `http://127.0.0.1:8000`. The application uses the `college_event_db` database and the `students`, `admins`, `events`, and `registrations` collections. It creates required indexes when the relevant account or registration flow is used.
 
-## Create an admin account
+## Admin account setup
 
-Admin registration is not available on the public site. Before starting the web server, create admins from a PowerShell session where `MONGODB_URI` is set (or set it again in a second terminal). The password is entered securely and is not placed in the command history:
+On a fresh database with no admins, the Admin portal offers a one-time public form to create the first admin using an admin name and password. The form closes after an admin account exists. **Anyone who can reach the site can claim that first account**, so do not expose the site publicly before initial setup. For production, create the first admin with the CLI before opening the site; the public first-admin form will then remain closed.
+
+To provision an admin from a PowerShell session where `MONGODB_URI` is set (or set it again in a second terminal), enter the password securely so it is not placed in command history:
 
 ```powershell
 $securePassword = Read-Host "Admin password (12–72 characters)" -AsSecureString
@@ -52,7 +54,7 @@ try {
 }
 ```
 
-Student accounts are created from **Student Registration** on the home page. New event registrations begin as pending and reserve a participant place until an admin confirms or rejects them.
+Admin sign-in accepts the admin name or CLI username with its password. Student accounts are created from the Student portal and include roll number, name, branch, section, year, phone, and password. New event registrations begin as pending and reserve a participant place until an admin confirms or rejects them.
 
 ## Event posters and deployment
 

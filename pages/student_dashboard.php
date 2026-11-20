@@ -1,6 +1,8 @@
 <?php
 if (!defined('APP_BOOTSTRAPPED')) { http_response_code(404); exit; }
 $user = current_user();
+$showRegistrationRocket = ($_SESSION['ui_effect'] ?? null) === 'paper-rocket';
+if ($showRegistrationRocket) unset($_SESSION['ui_effect']);
 $studentId = new MongoDB\BSON\ObjectId($user['id']);
 $student = collection('students')->findOne(['_id' => $studentId]);
 ensure_event_date_index();
@@ -22,8 +24,14 @@ foreach ($myRegistrations as $registration) {
     $registeredEvents[(string)$registration['event_id']] = $registration;
 }
 ?>
+<?php if ($showRegistrationRocket): ?>
+<div class="registration-rocket" role="status" aria-label="Registration request sent">
+  <span class="rocket-trail" aria-hidden="true"></span>
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20 21 3 15 23l-4-8-8 5Z" fill="currentColor"/><path d="m11 15 10-12" fill="none" stroke="#fff" stroke-width="1.2"/></svg>
+</div>
+<?php endif; ?>
 <section class="student-welcome">
-  <div><span class="eyebrow">STUDENT DASHBOARD</span><h2>Welcome, <?= h($student['name'] ?? $user['name']) ?></h2><p><?= h($student['branch'] ?? 'Student') ?> · Section <?= h($student['section'] ?? '—') ?> · Roll <?= h($student['roll_number'] ?? $user['roll_number']) ?></p></div>
+  <div><span class="eyebrow">STUDENT DASHBOARD</span><h2>Welcome, <?= h($student['name'] ?? $user['name']) ?></h2><p><?= h($student['branch'] ?? 'Student') ?> · Year <?= h($student['year'] ?? '—') ?> · Section <?= h($student['section'] ?? '—') ?> · Roll <?= h($student['roll_number'] ?? $user['roll_number']) ?></p></div>
   <div class="welcome-mark">✦</div>
 </section>
 <section class="section-heading"><div><span class="eyebrow">YOUR NEXT EXPERIENCE</span><h2>Upcoming events <span class="count"><?= count($upcomingEvents) ?></span></h2></div></section>

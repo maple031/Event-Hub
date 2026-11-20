@@ -2,6 +2,8 @@
 if (!defined('APP_BOOTSTRAPPED')) { http_response_code(404); exit; }
 $user = current_user();
 if ($user && $user['role'] === 'admin'):
+    $showEventBalloons = ($_SESSION['ui_effect'] ?? null) === 'event-balloons';
+    if ($showEventBalloons) unset($_SESSION['ui_effect']);
     $studentsTotal = collection('students')->countDocuments(['roll_number' => ['$type' => 'string']]);
     $eventsTotal = count_docs('events');
     $registrationsTotal = count_docs('registrations');
@@ -22,6 +24,12 @@ if ($user && $user['role'] === 'admin'):
         ['sort' => ['registered_at' => -1], 'limit' => 8]
     ));
 ?>
+<?php if ($showEventBalloons): ?>
+<div class="event-balloon-toast" role="status" aria-live="polite">
+  <span class="event-balloons" aria-hidden="true"><span>🎈</span><span>🎈</span><span>🎈</span></span>
+  <span><strong>Event added!</strong><small>Your new campus event is on the calendar.</small></span>
+</div>
+<?php endif; ?>
 <section class="section-heading"><div><span class="eyebrow">ADMINISTRATION</span><h2>Campus at a glance</h2></div><a class="btn btn-primary" href="index.php?page=events">＋ Manage events</a></section>
 <section class="stats-grid">
   <article class="stat-card"><span class="stat-icon purple">♙</span><small>Registered students</small><strong><?= $studentsTotal ?></strong><span class="stat-note">Student accounts</span></article>
@@ -53,18 +61,58 @@ if ($user && $user['role'] === 'admin'):
   </div>
 </section>
 <?php else: ?>
+<?php
+$homeEvents = [];
+if ($dbReady) {
+    ensure_event_date_index();
+    $now = new DateTimeImmutable();
+    foreach (collection('events')->find(
+        ['event_date' => ['$gte' => date('Y-m-d')]],
+        ['sort' => ['event_date' => 1, 'event_time' => 1]]
+    ) as $event) {
+        $start = event_datetime($event);
+        if ($start && $start > $now) $homeEvents[] = $event;
+        if (count($homeEvents) === 3) break;
+    }
+}
+?>
 <section class="hero home-hero">
-  <div><span class="pill">✦ COLLEGE EVENT HUB</span><h2>Make every college<br><em>moment count.</em></h2><p>Discover campus events, connect with your community, and keep every registration in one place.</p><a class="btn btn-light" href="index.php?page=events">Explore events <span>→</span></a></div>
-  <div class="hero-art"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="hero-card"><span class="hero-icon">✦</span><strong>Ideas become<br>experiences.</strong><small>CREATE · CONNECT · CELEBRATE</small></div><span class="spark spark-a">✳</span><span class="spark spark-b">✦</span></div>
+  <div class="home-hero-copy">
+    <span class="pill">✦ COLLEGE EVENT HUB</span>
+    <h2>“The best college memories are made <em>together.”</em></h2>
+    <p>From music nights to cultural celebrations, find your next reason to get together and enjoy campus life.</p>
+    <div class="home-hero-actions"><a class="btn btn-light" href="index.php?page=events">Explore events <span>→</span></a><a class="home-student-link" href="index.php?page=signup">Join the fun</a></div>
+  </div>
+  <div class="home-photo-collage" aria-label="Scenes from college events">
+    <figure class="home-photo-card home-photo-tall">
+      <img src="https://images.pexels.com/photos/37882408/pexels-photo-37882408.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Graduates celebrating together at a campus event" fetchpriority="high" referrerpolicy="no-referrer">
+      <figcaption>Campus celebrations</figcaption>
+    </figure>
+    <figure class="home-photo-card">
+      <img src="https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=700" alt="A crowd enjoying live music together" loading="lazy" referrerpolicy="no-referrer">
+      <figcaption>Music nights</figcaption>
+    </figure>
+    <figure class="home-photo-card">
+      <img src="https://images.pexels.com/photos/40350779/pexels-photo-40350779.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=700" alt="A group of friends posing together at a college event" loading="lazy" referrerpolicy="no-referrer">
+      <figcaption>Moments with friends</figcaption>
+    </figure>
+  </div>
 </section>
-<section class="portal-grid">
-  <article class="portal-card student-portal"><span class="quick-icon purple">♙</span><span class="eyebrow">STUDENT PORTAL</span><h2>Join the campus experience</h2><p>Sign in or create a student account to register for events and track your plans.</p><div class="portal-actions"><a class="btn btn-primary" href="index.php?page=login">Student login</a><a class="text-link" href="index.php?page=signup">Create account →</a></div></article>
-  <article class="portal-card admin-portal"><span class="quick-icon orange">⚙</span><span class="eyebrow">ADMIN PORTAL</span><h2>Manage campus events</h2><p>Create events, monitor registrations, and review participant lists.</p><div class="portal-actions"><a class="btn btn-dark" href="index.php?page=admin_login">Admin login</a></div></article>
+<?php if ($dbReady): ?>
+<section class="home-events">
+  <div class="section-heading"><div><span class="eyebrow">MAKE ROOM FOR FUN</span><h2>Coming up on campus</h2></div><a class="text-link" href="index.php?page=events">See all events →</a></div>
+  <?php if ($homeEvents): ?>
+    <div class="home-event-grid">
+      <?php foreach ($homeEvents as $event): $posterPath = safe_poster_path($event['poster'] ?? null); ?>
+        <article class="home-event-card">
+          <?php if ($posterPath && is_file($posterPath)): ?><img src="<?= h($event['poster']) ?>" alt="<?= h($event['event_name'] ?? 'Event') ?> poster" loading="lazy"><?php else: ?><div class="home-event-art" aria-hidden="true">✦</div><?php endif; ?>
+          <div class="home-event-info"><span class="eyebrow"><?= h(($event['event_date'] ?? '') . ' · ' . ($event['event_time'] ?? '')) ?></span><h3><?= h($event['event_name'] ?? '') ?></h3><p><?= h($event['description'] ?? '') ?></p><small>⌖ <?= h($event['venue'] ?? '') ?></small></div>
+        </article>
+      <?php endforeach; ?>
+    </div>
+  <?php else: ?>
+    <div class="home-events-empty"><span class="quick-icon purple">✦</span><div><h3>Your next campus memory is on its way.</h3><p>Check out the event calendar and come back soon for something exciting.</p></div><a class="btn btn-primary" href="index.php?page=events">Explore the calendar</a></div>
+  <?php endif; ?>
 </section>
-<section class="section-heading"><div><span class="eyebrow">FOR EVERYONE</span><h2>One hub for campus life</h2></div></section>
-<section class="quick-grid">
-  <a class="quick-card" href="index.php?page=events"><span class="quick-icon orange">▦</span><h3>Browse events</h3><p>Explore what's happening across campus.</p><b>View event calendar →</b></a>
-  <a class="quick-card" href="index.php?page=signup"><span class="quick-icon green">＋</span><h3>Register as a student</h3><p>Create your account with your college details.</p><b>Get started →</b></a>
-  <a class="quick-card" href="index.php?page=admin_login"><span class="quick-icon purple">☷</span><h3>Coordinate events</h3><p>Admins can manage events and participant registrations.</p><b>Admin portal →</b></a>
-</section>
+<?php endif; ?>
 <?php endif; ?>

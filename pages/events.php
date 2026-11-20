@@ -139,6 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['save_event', 'd
     ];
     if ($newPoster !== null) $eventData['poster'] = $newPoster;
 
+    $createdEvent = false;
     try {
         if ($existingEvent) {
             collection('events')->updateOne(['_id' => $eventObjectId], ['$set' => $eventData]);
@@ -151,6 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['save_event', 'd
             $eventData['registered_count'] = 0;
             $eventData['created_at'] = new MongoDB\BSON\UTCDateTime();
             collection('events')->insertOne($eventData);
+            $createdEvent = true;
             flash('success', 'Event created successfully.');
         }
     } catch (Throwable $e) {
@@ -162,6 +164,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['save_event', 'd
         }
         error_log('Event save failed: ' . $e->getMessage());
         flash('error', 'The event could not be saved. Please try again.');
+    }
+    if ($createdEvent) {
+        $_SESSION['ui_effect'] = 'event-balloons';
+        redirect('dashboard');
     }
     redirect('events');
 }
