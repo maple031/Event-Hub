@@ -31,7 +31,8 @@ if ($page === 'admin_login' && $user !== null) {
     redirect($user['role'] === 'admin' ? 'dashboard' : 'student_dashboard');
 }
 if ($dbReady) {
-    if ($page === 'dashboard' || $page === 'students' || $page === 'registrations') require_role('admin');
+    if ($page === 'dashboard' && $user !== null && $user['role'] === 'admin') require_role('admin');
+    if ($page === 'students' || $page === 'registrations') require_role('admin');
     if ($page === 'student_dashboard' || $page === 'register' || $page === 'my_registrations') require_role('student');
 }
 
